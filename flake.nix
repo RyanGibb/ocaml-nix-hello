@@ -1,28 +1,24 @@
 {
   inputs.opam-nix.url = "github:tweag/opam-nix";
 
-  outputs = { self, opam-nix, ... }:
+  outputs = { self, opam-nix }:
     let
       system = "x86_64-linux";
-      inherit (opam-nix.lib.${system})
-        buildOpamProject
-        materializedDefsToScope
-        materializeOpamProject';
+      inherit (opam-nix.lib.${system}) buildOpamProject;
       package = "hello";
-      query = {
-        ocaml-base-compiler = "*";
+      overlay = final: prev: {
+        "${package}" = prev.${package}.overrideAttrs (_: {
+          # override derivation attributes, e.g. add additional dependacies
+          buildInputs = [ ];
+        });
       };
-      resolved-scope = buildOpamProject { } package ./. query;
-      materialized-scope = materializedDefsToScope
-        { sourceMap.${package} = ./.; } ./package-defs.json;
+      overlayed-scope = let
+        scope = buildOpamProject { } package ./. {
+          ocaml-base-compiler = "*";
+        };
+        in scope.overrideScope' overlay; 
     in rec {
-      packages = {
-        resolved = resolved-scope;
-        materialized.${system} = materialized-scope;
-        # to generate:
-        #   cat $(nix eval .#package-defs --raw) > package-defs.json
-        ${system}.package-defs = materializeOpamProject' { } ./. query;
-      };
-      defaultPackage.${system} = packages.materialized.${system}.${package};
+      packages.${system} = overlayed-scope;
+      defaultPackage.${system} = packages.${system}.${package};
     };
 }
