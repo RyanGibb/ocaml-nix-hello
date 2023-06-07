@@ -1,24 +1,28 @@
 {
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs";
-    opam-nix.url = "github:tweag/opam-nix";
-    opam-repository = {
-      url = "github:ocaml/opam-repository";
-      flake = false;
-    };
-    opam-nix.inputs.opam-repository.follows = "opam-repository";
-    opam-nix.inputs.nixpkgs.follows = "nixpkgs";
-  };
+  inputs.opam-nix.url = "github:tweag/opam-nix";
 
   outputs = { self, opam-nix, ... }:
     let
       system = "x86_64-linux";
-      inherit (opam-nix.lib.${system}) buildOpamProject;
+      inherit (opam-nix.lib.${system})
+        buildOpamProject
+        materializedDefsToScope
+        materializeOpamProject';
       package = "hello";
-    in rec {
-      packages.${system} = buildOpamProject { } package ./. {
+      query = {
         ocaml-base-compiler = "*";
       };
-      defaultPackage.${system} = packages.${system}.${package};
+      resolved-scope = buildOpamProject { } package ./. query;
+      materialized-scope = materializedDefsToScope
+        { sourceMap.${package} = ./.; } ./package-defs.json;
+    in rec {
+      packages = {
+        resolved = resolved-scope;
+        materialized.${system} = materialized-scope;
+        # to generate:
+        #   cat $(nix eval .#package-defs --raw) > package-defs.json
+        ${system}.package-defs = materializeOpamProject' { } ./. query;
+      };
+      defaultPackage.${system} = packages.materialized.${system}.${package};
     };
 }
