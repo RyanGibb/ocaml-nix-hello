@@ -49,6 +49,19 @@
     },
     "nixpkgs": {
       "locked": {
+        "lastModified": 1684580438,
+        "narHash": "sha256-LUPswmDn6fXP3lEBJFA2Id8PkcYDgzUilevWackYVvQ=",
+        "path": "/nix/store/crfrzvvz4yccklxcckdad3v0akbxyn2l-source",
+        "rev": "7dc71aef32e8faf065cb171700792cf8a65c152d",
+        "type": "path"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
         "lastModified": 1682362401,
         "narHash": "sha256-/UMUHtF2CyYNl4b60Z2y4wwTTdIWGKhj9H301EDcT9M=",
         "owner": "nixos",
@@ -68,7 +81,7 @@
         "flake-compat": "flake-compat",
         "flake-utils": "flake-utils",
         "mirage-opam-overlays": "mirage-opam-overlays",
-        "nixpkgs": "nixpkgs",
+        "nixpkgs": "nixpkgs_2",
         "opam-overlays": "opam-overlays",
         "opam-repository": "opam-repository",
         "opam2json": "opam2json"
@@ -142,6 +155,7 @@
     },
     "root": {
       "inputs": {
+        "nixpkgs": "nixpkgs",
         "opam-nix": "opam-nix"
       }
     }
