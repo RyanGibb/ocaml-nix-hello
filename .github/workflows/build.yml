@@ -1,0 +1,17 @@
+name: ci
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - "main"
+  workflow_dispatch:
+jobs:
+  nix:
+    name: Build with Nix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v12
+      - run: nix --extra-experimental-features "nix-command flakes" build
